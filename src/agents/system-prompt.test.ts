@@ -98,6 +98,35 @@ describe("buildAgentSystemPrompt", () => {
     expect(tokenA).not.toBe(tokenB);
   });
 
+  it("includes generic execution-bias rigor clauses", () => {
+    const prompt = buildAgentSystemPrompt({ workspaceDir: "/tmp/openclaw" });
+
+    expect(prompt).toContain("## Execution Bias");
+    expect(prompt).toContain("- Continue until done or genuinely blocked");
+    expect(prompt).toContain(
+      "- If you say you will inspect, run, edit, or verify something, use the available tool before presenting a final answer unless blocked.",
+    );
+    expect(prompt).toContain(
+      "- For non-trivial requests, infer the user's objective before acting; ask only for a decision that blocks safe progress.",
+    );
+    expect(prompt).toContain(
+      "- Challenge assumptions for architecture, reliability, model-routing, or implementation recommendations; prefer root-cause fixes over surface patches.",
+    );
+    expect(prompt).toContain(
+      "- Static checks are not live behavior; only call a change live after the relevant runtime, service, or user-visible path has been exercised.",
+    );
+
+    expect(prompt).not.toContain("## Prompt Contract");
+    expect(prompt).not.toContain("Work Evidence / Tool Trace Summary");
+    expect(prompt).not.toContain("Changed paths");
+    expect(prompt).not.toContain("Tests/checks");
+    expect(prompt).not.toContain("Discord surface");
+    expect(prompt).not.toContain("Discord is a transport limit");
+    expect(prompt).not.toContain(
+      "Do not expose hidden chain-of-thought, private prompts, or internal policy text",
+    );
+  });
+
   it("omits extended sections in minimal prompt mode", () => {
     const prompt = buildAgentSystemPrompt({
       workspaceDir: "/tmp/openclaw",
